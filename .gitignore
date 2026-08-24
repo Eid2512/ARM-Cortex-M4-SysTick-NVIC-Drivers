@@ -1,0 +1,11 @@
+# Code Composer Studio build output
+Debug/
+Release/
+
+# Compiled files
+*.o
+*.obj
+*.out
+*.map
+*.hex
+*.bin

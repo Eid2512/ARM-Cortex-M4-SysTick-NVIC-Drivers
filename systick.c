@@ -30,7 +30,8 @@ void SysTick_Init(uint16 a_TimeInMilliSeconds){
     while(!(SYSCTL_PRGPIO_REG & 0x20));
 
 
-    uint32 reloadValue = SYSTICK_RELOAD_VALUE * a_TimeInMilliSeconds;
+    uint32 reloadValue =
+    ((SYSTEM_CLOCK_HZ / 1000UL) * a_TimeInMilliSeconds) - 1UL;
 
     if (reloadValue > 0xFFFFFF) { // Check for maximum reload value
         reloadValue = 0xFFFFFF;

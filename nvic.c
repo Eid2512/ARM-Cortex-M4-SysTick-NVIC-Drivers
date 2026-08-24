@@ -18,29 +18,14 @@
  * Return value: None
  * Description: Function to enable Interrupt request for specific IRQ
 **********************************************************************/
-void NVIC_EnableIRQ(NVIC_IRQType IRQ_Num){
-    NVIC_IRQType IRQ_Num_final;
-    if(IRQ_Num < 32 ){
-        IRQ_Num_final = IRQ_Num;
-        NVIC_EN0_REG |= (1 << IRQ_Num_final);
-    }
-    else if( 32 < IRQ_Num < 64 ){
-        IRQ_Num_final = IRQ_Num - 32;
-        NVIC_EN1_REG |= (1 << IRQ_Num_final);
+void NVIC_EnableIRQ(NVIC_IRQType IRQ_Num)
+{
+    uint8 regIndex = IRQ_Num / 32U;
+    uint8 bitPosition = IRQ_Num % 32U;
 
-    }
-    else if( 64 < IRQ_Num < 96 ){
-        IRQ_Num_final = IRQ_Num - 64;
-        NVIC_EN2_REG |= (1 << IRQ_Num_final);
-    }
-    else if( 96 < IRQ_Num < 128 ){
-        IRQ_Num_final = IRQ_Num - 96;
-        NVIC_EN3_REG |= (1 << IRQ_Num_final);
-    }
-    else if(IRQ_Num > 128 ){
-        IRQ_Num_final = IRQ_Num - 128;
-        NVIC_EN4_REG |= (1 << IRQ_Num_final);
-    }
+    volatile uint32 *enableReg = &NVIC_EN0_REG + regIndex;
+
+    *enableReg = (1UL << bitPosition);
 }
 
 
@@ -54,29 +39,14 @@ void NVIC_EnableIRQ(NVIC_IRQType IRQ_Num){
  * Return value: None
  * Description: Function to disable Interrupt request for specific IRQ
 **********************************************************************/
-void NVIC_DisableIRQ(NVIC_IRQType IRQ_Num){
-    NVIC_IRQType IRQ_Num_final;
-    if(IRQ_Num < 32 ){
-        IRQ_Num_final = IRQ_Num;
-        NVIC_DIS0_REG |= (1 << IRQ_Num_final);
-    }
-    else if( 32 < IRQ_Num < 64 ){
-        IRQ_Num_final = IRQ_Num - 32;
-        NVIC_DIS1_REG |= (1 << IRQ_Num_final);
+void NVIC_DisableIRQ(NVIC_IRQType IRQ_Num)
+{
+    uint8 regIndex = IRQ_Num / 32U;
+    uint8 bitPosition = IRQ_Num % 32U;
 
-    }
-    else if( 64 < IRQ_Num < 96 ){
-        IRQ_Num_final = IRQ_Num - 64;
-        NVIC_DIS2_REG |= (1 << IRQ_Num_final);
-    }
-    else if( 96 < IRQ_Num < 128 ){
-        IRQ_Num_final = IRQ_Num - 96;
-        NVIC_DIS3_REG |= (1 << IRQ_Num_final);
-    }
-    else if(IRQ_Num > 128 ){
-        IRQ_Num_final = IRQ_Num - 128;
-        NVIC_DIS4_REG |= (1 << IRQ_Num_final);
-    }
+    volatile uint32 *disableReg = &NVIC_DIS0_REG + regIndex;
+
+    *disableReg = (1UL << bitPosition);
 }
 
 /*********************************************************************
@@ -91,21 +61,17 @@ void NVIC_DisableIRQ(NVIC_IRQType IRQ_Num){
  * Return value: None
  * Description: Function to set the priority for specific IRQ
 **********************************************************************/
-void NVIC_SetPriorityIRQ(NVIC_IRQType IRQ_Num, NVIC_IRQPriorityType IRQ_Priority){
+void NVIC_SetPriorityIRQ(NVIC_IRQType IRQ_Num,
+                         NVIC_IRQPriorityType IRQ_Priority)
+{
+    uint8 regIndex = IRQ_Num / 4U;
+    uint8 bitPosition = ((IRQ_Num % 4U) * 8U) + 5U;
 
-    uint8 regIndex = IRQ_Num / 4; // to get the index of register
-    // each interrupt priority register contains 4 interrupts from vector table
-    // regIndex acts as offset to define the address of the required register
+    volatile uint32 *priorityReg = &NVIC_PRI0_REG + regIndex;
 
-
-    uint8 priorityField = (IRQ_Num % 4) * 8 + 5; // the position of IRQ
-    // %4 --> to select the position between the enable registers
-    // *8 --> because each register 8 bits
-    // +5 --> usage of the top three bits
-
-    volatile uint32 *priorityReg = &NVIC_PRI0_REG + regIndex; // regIndex acts as offset to define the required enable register
-
-    *priorityReg = (*priorityReg & ~(0xFF << priorityField ) ) | (IRQ_Priority << priorityField);// assign the priority level to the required IRQ
+    *priorityReg =
+        (*priorityReg & ~(0x7UL << bitPosition)) |
+        ((IRQ_Priority & 0x7UL) << bitPosition);
 }
 
 

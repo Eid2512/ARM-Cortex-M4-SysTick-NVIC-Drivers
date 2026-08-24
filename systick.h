@@ -10,8 +10,10 @@
 
 #include "tm4c123gh6pm_registers.h"
 
-#define clockSpeed 16000000
-#define SYSTICK_RELOAD_VALUE ((clockSpeed / 1000) - 1) // Assuming 1ms time base
+
+#define SYSTEM_CLOCK_HZ 16000000UL
+#define SYSTICK_MAX_RELOAD 0xFFFFFFUL
+
 
 void SysTick_Init(uint16 a_TimeInMilliSeconds);
 void SysTick_StartBusyWait(uint16 a_TimeInMilliSeconds);
